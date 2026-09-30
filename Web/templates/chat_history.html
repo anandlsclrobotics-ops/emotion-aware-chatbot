@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Chat History | Emotion AI</title>
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <style>
+
+        body {
+            background: #f4f6f8;
+            font-family: Arial, sans-serif;
+        }
+
+        /* =====================================================
+           NAVBAR
+        ===================================================== */
+
+        .navbar-custom {
+            background: #212529;
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+        }
+
+        /* =====================================================
+           MAIN CONTAINER
+        ===================================================== */
+
+        .history-container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .page-title {
+            font-weight: 700;
+            color: #212529;
+            margin-bottom: 5px;
+        }
+
+        .page-subtitle {
+            color: #6c757d;
+            margin-bottom: 30px;
+        }
+
+        /* =====================================================
+           HISTORY CARD
+        ===================================================== */
+
+        .history-card {
+            background: white;
+            border-radius: 14px;
+            padding: 25px;
+            margin-bottom: 25px;
+
+            box-shadow:
+                0 4px 15px rgba(0, 0, 0, 0.08);
+
+            border: 1px solid #e9ecef;
+        }
+
+        /* =====================================================
+           CARD HEADER
+        ===================================================== */
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .conversation-number {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .conversation-time {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        /* =====================================================
+           MESSAGE LABELS
+        ===================================================== */
+
+        .message-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6c757d;
+
+            margin-bottom: 7px;
+        }
+
+        /* =====================================================
+           USER MESSAGE
+        ===================================================== */
+
+        .user-message {
+            background: #212529;
+            color: white;
+
+            padding: 14px 18px;
+
+            border-radius: 10px;
+
+            margin-bottom: 20px;
+
+            line-height: 1.6;
+
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        /* =====================================================
+           BOT RESPONSE
+        ===================================================== */
+
+        .bot-response {
+            background: #f8f9fa;
+            color: #212529;
+
+            padding: 16px 18px;
+
+            border-radius: 10px;
+
+            border: 1px solid #e9ecef;
+
+            line-height: 1.7;
+
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: anywhere;
+
+            margin-bottom: 20px;
+        }
+
+        /* =====================================================
+           INFORMATION ROW
+        ===================================================== */
+
+        .info-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+
+            margin-top: 10px;
+        }
+
+        .info-badge {
+            display: inline-flex;
+            align-items: center;
+
+            padding: 7px 11px;
+
+            border-radius: 20px;
+
+            font-size: 12px;
+
+            background: #f1f3f5;
+            color: #495057;
+
+            border: 1px solid #dee2e6;
+        }
+
+        /* =====================================================
+           LLM SOURCE BADGE
+        ===================================================== */
+
+        .source-llm {
+            background: #eef7ff;
+            color: #1769aa;
+
+            border: 1px solid #b6dcff;
+
+            font-weight: 600;
+        }
+
+        /* =====================================================
+           FALLBACK SOURCE BADGE
+        ===================================================== */
+
+        .source-fallback {
+            background: #fff8e6;
+            color: #946200;
+
+            border: 1px solid #f5d98b;
+
+            font-weight: 600;
+        }
+
+        /* =====================================================
+           EMPTY HISTORY
+        ===================================================== */
+
+        .empty-history {
+            background: white;
+
+            border-radius: 14px;
+
+            padding: 50px 25px;
+
+            text-align: center;
+
+            box-shadow:
+                0 4px 15px rgba(0, 0, 0, 0.06);
+
+            color: #6c757d;
+        }
+
+        .empty-history h4 {
+            color: #343a40;
+            margin-bottom: 10px;
+        }
+
+        /* =====================================================
+           BACK BUTTON
+        ===================================================== */
+
+        .back-button {
+            margin-bottom: 25px;
+        }
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 768px) {
+
+            .history-container {
+                margin-top: 25px;
+            }
+
+            .history-card {
+                padding: 18px;
+            }
+
+            .history-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+        }
+
+    </style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     NAVBAR
+========================================================= -->
+
+<nav class="navbar navbar-dark navbar-custom">
+    <div class="container">
+
+        <a
+            class="navbar-brand"
+            href="{% url 'dashboard' %}"
+        >
+            🤖 Emotion AI
+        </a>
+
+        <div>
+
+            <a
+                href="{% url 'dashboard' %}"
+                class="btn btn-outline-light btn-sm me-2"
+            >
+                Dashboard
+            </a>
+
+            <a
+                href="{% url 'chat_page' %}"
+                class="btn btn-light btn-sm"
+            >
+                Start Chat
+            </a>
+
+        </div>
+
+    </div>
+</nav>
+
+
+<!-- =========================================================
+     MAIN CONTENT
+========================================================= -->
+
+<div class="history-container">
+
+    <!-- PAGE TITLE -->
+
+    <h2 class="page-title">
+        Chat History
+    </h2>
+
+    <p class="page-subtitle">
+        Review your previous emotion-aware conversations.
+    </p>
+
+
+    <!-- =====================================================
+         BACK BUTTON
+    ====================================================== -->
+
+    <div class="back-button">
+
+        <a
+            href="{% url 'dashboard' %}"
+            class="btn btn-dark"
+        >
+            ← Back to Dashboard
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         HISTORY
+    ====================================================== -->
+
+    {% if history %}
+
+        {% for message in history %}
+
+            <div class="history-card">
+
+                <!-- =========================================
+                     HEADER
+                ========================================== -->
+
+                <div class="history-header">
+
+                    <div class="conversation-number">
+                        Conversation #{{ forloop.counter }}
+                    </div>
+
+                    <div class="conversation-time">
+
+                        {{ message.created_at|date:"d M Y, h:i A" }}
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================================
+                     USER MESSAGE
+                ========================================== -->
+
+                <div class="message-label">
+                    You
+                </div>
+
+                <div class="user-message">
+
+                    {{ message.user_message }}
+
+                </div>
+
+
+                <!-- =========================================
+                     AI RESPONSE
+                ========================================== -->
+
+                <div class="message-label">
+                    AI Assistant
+                </div>
+
+                <div class="bot-response">
+
+                    {{ message.bot_response }}
+
+                </div>
+
+
+                <!-- =========================================
+                     INFORMATION
+                ========================================== -->
+
+                <div class="info-row">
+
+                    <!-- Emotion -->
+
+                    {% if message.detected_emotion %}
+
+                        <span class="info-badge">
+
+                            😊 Emotion:
+                            <strong class="ms-1">
+                                {{ message.detected_emotion }}
+                            </strong>
+
+                        </span>
+
+                    {% endif %}
+
+
+                    <!-- Confidence -->
+
+                    {% if message.confidence is not None %}
+
+                        <span class="info-badge">
+
+                            📊 Confidence:
+                            <strong class="ms-1">
+                                {{ message.confidence|floatformat:2 }}
+                            </strong>
+
+                        </span>
+
+                    {% endif %}
+
+
+                    <!-- Intent -->
+
+                    {% if message.detected_intent %}
+
+                        <span class="info-badge">
+
+                            🧠 Intent:
+                            <strong class="ms-1">
+                                {{ message.detected_intent }}
+                            </strong>
+
+                        </span>
+
+                    {% endif %}
+
+
+                    <!-- =====================================
+                         RESPONSE SOURCE
+                    ====================================== -->
+
+                    {% if message.response_source == "llm" %}
+
+                        <span class="info-badge source-llm">
+
+                            ✨ Gemini LLM
+
+                        </span>
+
+                    {% elif message.response_source == "fallback" %}
+
+                        <span class="info-badge source-fallback">
+
+                            ⚙️ Fallback
+
+                        </span>
+
+                    {% else %}
+
+                        <span class="info-badge">
+
+                            🤖 Chatbot
+
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+
+    {% else %}
+
+        <!-- =================================================
+             NO HISTORY
+        ================================================== -->
+
+        <div class="empty-history">
+
+            <h4>
+                No conversations yet
+            </h4>
+
+            <p>
+                Start chatting with Emotion AI to build your
+                conversation history.
+            </p>
+
+            <a
+                href="{% url 'chat_page' %}"
+                class="btn btn-dark mt-3"
+            >
+                Start Chatting
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =========================================================
+     BOOTSTRAP JS
+========================================================= -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+
+</body>
+</html>

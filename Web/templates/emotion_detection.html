@@ -1,0 +1,1263 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+
+/* =====================================================
+   MAIN PAGE
+===================================================== */
+
+.emotion-page {
+    padding-bottom: 40px;
+}
+
+
+/* =====================================================
+   PAGE TITLE
+===================================================== */
+
+.page-title {
+    font-weight: 700;
+    color: #343a40;
+}
+
+.page-subtitle {
+    color: #6c757d;
+    font-size: 15px;
+}
+
+
+/* =====================================================
+   CAMERA CARD
+===================================================== */
+
+.camera-card {
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.camera-container {
+    background: #111;
+    border-radius: 12px;
+    overflow: hidden;
+    height: 500px;
+    position: relative;
+}
+
+#video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+/* =====================================================
+   CAMERA BUTTONS
+===================================================== */
+
+.camera-buttons {
+    margin-top: 20px;
+}
+
+.camera-buttons .btn {
+    min-width: 160px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   STATUS BADGE
+===================================================== */
+
+#cameraStatus {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+
+/* =====================================================
+   RESULT CARDS
+===================================================== */
+
+.result-card {
+    border: none;
+    border-radius: 16px;
+    transition: all 0.25s ease;
+    overflow: hidden;
+}
+
+.result-card:hover {
+    transform: translateY(-3px);
+}
+
+
+/* =====================================================
+   EMOTION RESULT
+===================================================== */
+
+.emotion-result-card {
+    text-align: center;
+}
+
+.result-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #495057;
+}
+
+
+/* =====================================================
+   EMOTION EMOJI
+===================================================== */
+
+#emotionEmoji {
+    font-size: 72px;
+    line-height: 1;
+    margin-top: 15px;
+    margin-bottom: 12px;
+    transition: transform 0.2s ease;
+}
+
+#emotionEmoji:hover {
+    transform: scale(1.08);
+}
+
+
+/* =====================================================
+   EMOTION NAME
+===================================================== */
+
+#emotionResult {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+
+/* =====================================================
+   EMOTION DESCRIPTION
+===================================================== */
+
+#emotionMessage {
+    color: #6c757d;
+    font-size: 14px;
+    margin-bottom: 0;
+}
+
+
+/* =====================================================
+   CONFIDENCE
+===================================================== */
+
+.confidence-value {
+    font-size: 32px;
+    font-weight: 700;
+}
+
+
+/* =====================================================
+   PROGRESS BAR
+===================================================== */
+
+.confidence-progress {
+    height: 28px;
+    border-radius: 20px;
+    overflow: hidden;
+    background-color: #e9ecef;
+}
+
+#confidenceBar {
+    border-radius: 20px;
+    font-weight: 600;
+    transition: width 0.4s ease;
+}
+
+
+/* =====================================================
+   CONFIDENCE MESSAGE
+===================================================== */
+
+#confidenceMessage {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   DETECTION INFO
+===================================================== */
+
+.detection-info {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 12px 15px;
+    margin-top: 20px;
+    text-align: center;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+
+/* =====================================================
+   MOBILE RESPONSIVE
+===================================================== */
+
+@media (max-width: 768px) {
+
+    .camera-container {
+        height: 380px;
+    }
+
+    .camera-buttons .btn {
+        min-width: 130px;
+        margin-bottom: 8px;
+    }
+
+    #emotionEmoji {
+        font-size: 60px;
+    }
+
+    #emotionResult {
+        font-size: 28px;
+    }
+
+    .confidence-value {
+        font-size: 28px;
+    }
+
+}
+
+</style>
+
+
+<div class="container emotion-page mt-4">
+
+
+    <!-- =================================================
+         PAGE HEADER
+    ================================================== -->
+
+    <div class="text-center mb-4">
+
+        <h2 class="page-title">
+            😊 Emotion Detection
+        </h2>
+
+        <p class="page-subtitle">
+            AI-powered facial emotion recognition
+        </p>
+
+    </div>
+
+
+
+    <!-- =================================================
+         CAMERA SECTION
+    ================================================== -->
+
+    <div class="card camera-card shadow-sm">
+
+        <div class="card-body p-3 p-md-4">
+
+
+            <!-- Camera -->
+
+            <div class="camera-container">
+
+                <video id="video"
+                       autoplay
+                       playsinline>
+                </video>
+
+                <!-- Hidden Canvas -->
+
+                <canvas id="canvas"
+                        style="display:none;">
+                </canvas>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 CAMERA BUTTONS
+            ================================================== -->
+
+            <div class="camera-buttons text-center">
+
+                <button id="startCamera"
+                        class="btn btn-primary btn-lg me-2">
+
+                    ▶️ Start Camera
+
+                </button>
+
+
+                <button id="stopCamera"
+                        class="btn btn-danger btn-lg">
+
+                    ⏹️ Stop Camera
+
+                </button>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 CAMERA STATUS
+            ================================================== -->
+
+            <div class="text-center mt-3">
+
+                <span id="cameraStatus"
+                      class="badge bg-secondary">
+
+                    Camera Off
+
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         RESULT SECTION
+    ================================================== -->
+
+    <div class="row mt-4 g-4">
+
+
+        <!-- =================================================
+             EMOTION CARD
+        ================================================== -->
+
+        <div class="col-md-6">
+
+            <div class="card result-card emotion-result-card shadow-sm h-100">
+
+                <div class="card-body p-4">
+
+
+                    <div class="result-title">
+
+                        Detected Emotion
+
+                    </div>
+
+
+                    <!-- Emotion Emoji -->
+
+                    <div id="emotionEmoji">
+
+                        🙂
+
+                    </div>
+
+
+                    <!-- Emotion Name -->
+
+                    <h2 id="emotionResult">
+
+                        --
+
+                    </h2>
+
+
+                    <!-- Emotion Description -->
+
+                    <p id="emotionMessage">
+
+                        Waiting for emotion detection...
+
+                    </p>
+
+
+                    <!-- Detection Info -->
+
+                    <div class="detection-info">
+
+                        🧠 AI facial emotion analysis is active
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             CONFIDENCE CARD
+        ================================================== -->
+
+        <div class="col-md-6">
+
+            <div class="card result-card shadow-sm h-100">
+
+                <div class="card-body p-4">
+
+
+                    <!-- Title -->
+
+                    <div class="result-title text-center">
+
+                        Prediction Confidence
+
+                    </div>
+
+
+                    <!-- Confidence Percentage -->
+
+                    <div class="text-center mt-3">
+
+                        <div id="confidenceResult"
+                             class="confidence-value">
+
+                            --%
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Progress Bar -->
+
+                    <div class="progress confidence-progress mt-3">
+
+                        <div id="confidenceBar"
+                             class="progress-bar progress-bar-striped progress-bar-animated"
+                             role="progressbar"
+                             style="width: 0%;"
+                             aria-valuenow="0"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+
+                            0%
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Confidence Message -->
+
+                    <p id="confidenceMessage"
+                       class="text-center mt-3 mb-0">
+
+                        Waiting for detection...
+
+                    </p>
+
+
+                    <!-- Confidence Explanation -->
+
+                    <div class="detection-info">
+
+                        📊 Confidence represents how strongly
+                        the AI model predicts the detected emotion.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     JAVASCRIPT
+====================================================== -->
+
+<script>
+
+
+// ======================================================
+// DOM ELEMENTS
+// ======================================================
+
+const video =
+    document.getElementById("video");
+
+const canvas =
+    document.getElementById("canvas");
+
+const startButton =
+    document.getElementById("startCamera");
+
+const stopButton =
+    document.getElementById("stopCamera");
+
+const emotionResult =
+    document.getElementById("emotionResult");
+
+const emotionEmoji =
+    document.getElementById("emotionEmoji");
+
+const emotionMessage =
+    document.getElementById("emotionMessage");
+
+const confidenceResult =
+    document.getElementById("confidenceResult");
+
+const confidenceBar =
+    document.getElementById("confidenceBar");
+
+const confidenceMessage =
+    document.getElementById("confidenceMessage");
+
+const cameraStatus =
+    document.getElementById("cameraStatus");
+
+
+
+// ======================================================
+// VARIABLES
+// ======================================================
+
+let stream = null;
+
+let detectionInterval = null;
+
+let isDetecting = false;
+
+
+
+// ======================================================
+// EMOTION → EMOJI
+// ======================================================
+
+function getEmotionEmoji(emotion) {
+
+    const emojis = {
+
+        "Angry": "😠",
+
+        "Happy": "😊",
+
+        "Neutral": "😐",
+
+        "Sad": "😢",
+
+        "Surprise": "😲"
+
+    };
+
+    return emojis[emotion] || "🙂";
+
+}
+
+
+
+// ======================================================
+// EMOTION → MESSAGE
+// ======================================================
+
+function getEmotionMessage(emotion) {
+
+    const messages = {
+
+        "Angry":
+            "The model detected an angry facial expression.",
+
+        "Happy":
+            "The model detected a happy facial expression.",
+
+        "Neutral":
+            "The model detected a neutral facial expression.",
+
+        "Sad":
+            "The model detected a sad facial expression.",
+
+        "Surprise":
+            "The model detected a surprised facial expression."
+
+    };
+
+    return messages[emotion]
+        || "Emotion detected successfully.";
+
+}
+
+
+
+// ======================================================
+// CONFIDENCE LEVEL
+// ======================================================
+
+function getConfidenceMessage(confidence) {
+
+    if (confidence >= 70) {
+
+        return "🟢 High confidence";
+
+    }
+
+    else if (confidence >= 40) {
+
+        return "🟡 Moderate confidence";
+
+    }
+
+    else {
+
+        return "🔴 Low confidence";
+
+    }
+
+}
+
+
+
+// ======================================================
+// START CAMERA
+// ======================================================
+
+startButton.addEventListener(
+    "click",
+    async function () {
+
+        try {
+
+
+            // Request webcam
+
+            stream =
+                await navigator.mediaDevices.getUserMedia({
+
+                    video: true,
+
+                    audio: false
+
+                });
+
+
+            // Attach webcam
+
+            video.srcObject = stream;
+
+
+            // Update status
+
+            cameraStatus.textContent =
+                "Camera Running";
+
+            cameraStatus.className =
+                "badge bg-success";
+
+
+            // Disable Start
+
+            startButton.disabled = true;
+
+
+            // Start detection
+
+            detectionInterval =
+                setInterval(
+
+                    captureFrame,
+
+                    500
+
+                );
+
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Camera Error:",
+                error
+            );
+
+
+            cameraStatus.textContent =
+                "Camera Error";
+
+            cameraStatus.className =
+                "badge bg-danger";
+
+        }
+
+    }
+);
+
+
+
+// ======================================================
+// STOP CAMERA
+// ======================================================
+
+stopButton.addEventListener(
+    "click",
+    function () {
+
+
+        // Stop camera
+
+        if (stream) {
+
+            stream
+                .getTracks()
+                .forEach(
+                    track => track.stop()
+                );
+
+            stream = null;
+
+        }
+
+
+        // Remove stream
+
+        video.srcObject = null;
+
+
+        // Stop detection
+
+        if (detectionInterval) {
+
+            clearInterval(
+                detectionInterval
+            );
+
+            detectionInterval = null;
+
+        }
+
+
+        // Reset detection
+
+        isDetecting = false;
+
+
+        // Enable Start
+
+        startButton.disabled = false;
+
+
+        // Status
+
+        cameraStatus.textContent =
+            "Camera Off";
+
+        cameraStatus.className =
+            "badge bg-secondary";
+
+
+        // Reset emotion
+
+        emotionResult.textContent =
+            "--";
+
+        emotionEmoji.textContent =
+            "🙂";
+
+        emotionMessage.textContent =
+            "Waiting for emotion detection...";
+
+
+        // Reset confidence
+
+        confidenceResult.textContent =
+            "--%";
+
+
+        confidenceBar.style.width =
+            "0%";
+
+        confidenceBar.textContent =
+            "0%";
+
+        confidenceBar.setAttribute(
+            "aria-valuenow",
+            "0"
+        );
+
+
+        confidenceBar.className =
+            "progress-bar";
+
+
+        confidenceMessage.textContent =
+            "Waiting for detection...";
+
+    }
+);
+
+
+
+// ======================================================
+// CAPTURE FRAME
+// ======================================================
+
+function captureFrame() {
+
+
+    // Camera check
+
+    if (!stream) {
+
+        return;
+
+    }
+
+
+    // Prevent overlapping requests
+
+    if (isDetecting) {
+
+        return;
+
+    }
+
+
+    // Video dimensions check
+
+    if (
+        video.videoWidth === 0 ||
+        video.videoHeight === 0
+    ) {
+
+        return;
+
+    }
+
+
+    isDetecting = true;
+
+
+    // Canvas size
+
+    canvas.width =
+        video.videoWidth;
+
+    canvas.height =
+        video.videoHeight;
+
+
+    // Canvas context
+
+    const context =
+        canvas.getContext("2d");
+
+
+    // Copy video frame
+
+    context.drawImage(
+
+        video,
+
+        0,
+
+        0,
+
+        canvas.width,
+
+        canvas.height
+
+    );
+
+
+    // Convert frame to JPEG
+
+    canvas.toBlob(
+
+        async function (blob) {
+
+
+            if (!blob) {
+
+                isDetecting = false;
+
+                return;
+
+            }
+
+
+            // FormData
+
+            const formData =
+                new FormData();
+
+
+            formData.append(
+
+                "image",
+
+                blob,
+
+                "frame.jpg"
+
+            );
+
+
+            try {
+
+
+                // ==================================================
+                // SEND FRAME TO DJANGO
+                // ==================================================
+
+                const response =
+                    await fetch(
+
+                        "{% url 'detect_emotion' %}",
+
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "X-CSRFToken":
+                                    getCookie(
+                                        "csrftoken"
+                                    )
+
+                            },
+
+                            body: formData
+
+                        }
+
+                    );
+
+
+                // JSON response
+
+                const data =
+                    await response.json();
+
+
+
+                // ==================================================
+                // API SUCCESS
+                // ==================================================
+
+                if (data.success) {
+
+
+                    // ==================================================
+                    // FACE DETECTED
+                    // ==================================================
+
+                    if (data.face_detected) {
+
+
+                        // ------------------------------------------
+                        // EMOTION
+                        // ------------------------------------------
+
+                        emotionResult.textContent =
+                            data.emotion;
+
+
+                        // ------------------------------------------
+                        // EMOTION EMOJI
+                        // ------------------------------------------
+
+                        emotionEmoji.textContent =
+                            getEmotionEmoji(
+                                data.emotion
+                            );
+
+
+                        // ------------------------------------------
+                        // EMOTION MESSAGE
+                        // ------------------------------------------
+
+                        emotionMessage.textContent =
+                            getEmotionMessage(
+                                data.emotion
+                            );
+
+
+
+                        // ==================================================
+                        // CONFIDENCE
+                        // ==================================================
+
+                        const confidence =
+                            data.confidence * 100;
+
+
+                        const roundedConfidence =
+                            confidence.toFixed(1);
+
+
+                        confidenceResult.textContent =
+                            roundedConfidence + "%";
+
+
+
+                        // ==================================================
+                        // PROGRESS BAR
+                        // ==================================================
+
+                        confidenceBar.style.width =
+                            roundedConfidence + "%";
+
+
+                        confidenceBar.textContent =
+                            roundedConfidence + "%";
+
+
+                        confidenceBar.setAttribute(
+
+                            "aria-valuenow",
+
+                            roundedConfidence
+
+                        );
+
+
+
+                        // ==================================================
+                        // CONFIDENCE COLOR
+                        // ==================================================
+
+                        if (confidence >= 70) {
+
+
+                            confidenceBar.className =
+                                "progress-bar bg-success progress-bar-striped progress-bar-animated";
+
+
+                        }
+
+                        else if (confidence >= 40) {
+
+
+                            confidenceBar.className =
+                                "progress-bar bg-warning progress-bar-striped progress-bar-animated";
+
+
+                        }
+
+                        else {
+
+
+                            confidenceBar.className =
+                                "progress-bar bg-danger progress-bar-striped progress-bar-animated";
+
+                        }
+
+
+
+                        // ==================================================
+                        // CONFIDENCE MESSAGE
+                        // ==================================================
+
+                        confidenceMessage.textContent =
+                            getConfidenceMessage(
+                                confidence
+                            );
+
+
+
+                        // ==================================================
+                        // CAMERA STATUS
+                        // ==================================================
+
+                        cameraStatus.textContent =
+                            "Face Detected";
+
+
+                        cameraStatus.className =
+                            "badge bg-success";
+
+                    }
+
+
+
+                    // ==================================================
+                    // NO FACE
+                    // ==================================================
+
+                    else {
+
+
+                        // Emotion
+
+                        emotionResult.textContent =
+                            "No Face";
+
+
+                        // Emoji
+
+                        emotionEmoji.textContent =
+                            "👤";
+
+
+                        // Message
+
+                        emotionMessage.textContent =
+                            "Please show your face to the camera.";
+
+
+                        // Confidence
+
+                        confidenceResult.textContent =
+                            "0%";
+
+
+                        // Progress bar
+
+                        confidenceBar.style.width =
+                            "0%";
+
+
+                        confidenceBar.textContent =
+                            "0%";
+
+
+                        confidenceBar.setAttribute(
+
+                            "aria-valuenow",
+
+                            "0"
+
+                        );
+
+
+                        confidenceBar.className =
+                            "progress-bar bg-secondary";
+
+
+                        // Confidence message
+
+                        confidenceMessage.textContent =
+                            "Waiting for a face...";
+
+
+                        // Status
+
+                        cameraStatus.textContent =
+                            "No Face Detected";
+
+
+                        cameraStatus.className =
+                            "badge bg-warning";
+
+                    }
+
+                }
+
+            }
+
+
+            catch (error) {
+
+
+                console.error(
+
+                    "Detection Error:",
+
+                    error
+
+                );
+
+            }
+
+
+            // Allow next request
+
+            isDetecting = false;
+
+        },
+
+        "image/jpeg",
+
+        0.75
+
+    );
+
+}
+
+
+
+// ======================================================
+// GET CSRF COOKIE
+// ======================================================
+
+function getCookie(name) {
+
+
+    let cookieValue = null;
+
+
+    if (
+        document.cookie &&
+        document.cookie !== ""
+    ) {
+
+
+        const cookies =
+            document.cookie.split(";");
+
+
+        for (
+            let i = 0;
+            i < cookies.length;
+            i++
+        ) {
+
+
+            const cookie =
+                cookies[i].trim();
+
+
+            if (
+                cookie.substring(
+                    0,
+                    name.length + 1
+                ) ===
+                (name + "=")
+            ) {
+
+
+                cookieValue =
+                    decodeURIComponent(
+
+                        cookie.substring(
+                            name.length + 1
+                        )
+
+                    );
+
+
+                break;
+
+            }
+
+        }
+
+    }
+
+
+    return cookieValue;
+
+}
+
+</script>
+
+{% endblock %}

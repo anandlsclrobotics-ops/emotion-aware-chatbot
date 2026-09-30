@@ -1,0 +1,1537 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+
+/* =====================================================
+   MAIN CHAT PAGE
+   ===================================================== */
+
+.chat-page {
+    min-height: calc(100vh - 80px);
+    padding: 35px 15px;
+    background: #f5f7fa;
+}
+
+.chat-wrapper {
+    max-width: 950px;
+    margin: auto;
+}
+
+
+/* =====================================================
+   CHAT CARD
+   ===================================================== */
+
+.chat-card {
+    height: 700px;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    border-radius: 22px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+
+/* =====================================================
+   CHAT HEADER
+   ===================================================== */
+
+.chat-header {
+    padding: 20px 25px;
+
+    background: #212529;
+
+    color: white;
+}
+
+.header-top {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    gap: 20px;
+}
+
+.chat-title {
+    margin: 0;
+
+    font-size: 23px;
+
+    font-weight: 600;
+}
+
+.chat-subtitle {
+    margin: 5px 0 0;
+
+    font-size: 14px;
+
+    opacity: 0.75;
+}
+
+
+/* =====================================================
+   ONLINE STATUS
+   ===================================================== */
+
+.bot-status {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-top: 9px;
+
+    font-size: 13px;
+}
+
+.status-dot {
+    width: 9px;
+    height: 9px;
+
+    background: #28a745;
+
+    border-radius: 50%;
+
+    display: inline-block;
+
+    box-shadow:
+        0 0 8px rgba(40, 167, 69, 0.7);
+}
+
+
+/* =====================================================
+   CAMERA STATUS
+   ===================================================== */
+
+.camera-status {
+    margin-top: 7px;
+
+    font-size: 12px;
+
+    color: #adb5bd;
+}
+
+#cameraStatus {
+    color: #ffc107;
+
+    font-weight: 500;
+}
+
+
+/* =====================================================
+   EMOTION STATUS PANEL
+   ===================================================== */
+
+.emotion-status {
+    min-width: 230px;
+
+    padding: 12px 15px;
+
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.emotion-status-title {
+    font-size: 11px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.7px;
+
+    opacity: 0.65;
+
+    margin-bottom: 5px;
+}
+
+.emotion-row {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+}
+
+#emotionDisplay {
+    font-size: 16px;
+
+    font-weight: 600;
+}
+
+#confidenceDisplay {
+    font-size: 13px;
+
+    opacity: 0.8;
+}
+
+
+/* =====================================================
+   CONFIDENCE BAR
+   ===================================================== */
+
+.confidence-container {
+    margin-top: 8px;
+}
+
+.confidence-track {
+    width: 100%;
+
+    height: 5px;
+
+    background: rgba(255, 255, 255, 0.15);
+
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+#confidenceBar {
+    width: 0%;
+
+    height: 100%;
+
+    background: #28a745;
+
+    border-radius: 10px;
+
+    transition: width 0.4s ease;
+}
+
+
+/* =====================================================
+   HIDDEN CAMERA
+   ===================================================== */
+
+#cameraVideo {
+    display: none;
+}
+
+#cameraCanvas {
+    display: none;
+}
+
+
+/* =====================================================
+   CHAT BODY
+   ===================================================== */
+
+.chat-body {
+    flex: 1;
+
+    padding: 25px;
+
+    overflow-y: auto;
+
+    background: #f8f9fa;
+}
+
+
+/* =====================================================
+   MESSAGE
+   ===================================================== */
+
+.message {
+    display: flex;
+
+    margin-bottom: 18px;
+}
+
+.bot-message {
+    justify-content: flex-start;
+}
+
+.user-message {
+    justify-content: flex-end;
+}
+
+.message-bubble {
+    max-width: 70%;
+
+    padding: 12px 17px;
+
+    border-radius: 16px;
+
+    font-size: 15px;
+
+    line-height: 1.5;
+
+    word-wrap: break-word;
+}
+
+
+/* =====================================================
+   BOT MESSAGE
+   ===================================================== */
+
+.bot-message .message-bubble {
+    background: white;
+
+    color: #212529;
+
+    border: 1px solid #e9ecef;
+
+    border-bottom-left-radius: 5px;
+
+    box-shadow:
+        0 2px 5px rgba(0, 0, 0, 0.03);
+}
+
+
+/* =====================================================
+   USER MESSAGE
+   ===================================================== */
+
+.user-message .message-bubble {
+    background: #212529;
+
+    color: white;
+
+    border-bottom-right-radius: 5px;
+}
+
+
+/* =====================================================
+   MESSAGE LABEL
+   ===================================================== */
+
+.message-label {
+    font-size: 11px;
+
+    font-weight: 600;
+
+    margin-bottom: 4px;
+
+    opacity: 0.6;
+}
+
+
+/* =====================================================
+   INPUT AREA
+   ===================================================== */
+
+.chat-input-area {
+    padding: 18px;
+
+    background: white;
+
+    border-top: 1px solid #e9ecef;
+}
+
+.chat-input-wrapper {
+    display: flex;
+
+    gap: 10px;
+}
+
+#messageInput {
+    flex: 1;
+
+    border: 1px solid #ced4da;
+
+    border-radius: 12px;
+
+    padding: 12px 15px;
+
+    outline: none;
+
+    font-size: 15px;
+
+    transition: 0.2s;
+}
+
+#messageInput:focus {
+    border-color: #212529;
+
+    box-shadow:
+        0 0 0 3px rgba(33, 37, 41, 0.08);
+}
+
+#sendButton {
+    min-width: 90px;
+
+    border-radius: 12px;
+
+    font-weight: 500;
+}
+
+#sendButton:disabled {
+    cursor: not-allowed;
+
+    opacity: 0.65;
+}
+
+
+/* =====================================================
+   TYPING INDICATOR
+   ===================================================== */
+
+.typing {
+    display: none;
+
+    font-size: 13px;
+
+    color: #6c757d;
+
+    margin-bottom: 10px;
+}
+
+
+/* =====================================================
+   MOBILE
+   ===================================================== */
+
+@media (max-width: 768px) {
+
+    .chat-page {
+        padding: 20px 10px;
+    }
+
+    .chat-card {
+        height: 78vh;
+
+        border-radius: 16px;
+    }
+
+    .header-top {
+        flex-direction: column;
+    }
+
+    .emotion-status {
+        width: 100%;
+
+        min-width: auto;
+    }
+
+    .chat-header {
+        padding: 17px;
+    }
+
+    .chat-body {
+        padding: 17px;
+    }
+
+    .message-bubble {
+        max-width: 85%;
+    }
+
+    .chat-input-area {
+        padding: 12px;
+    }
+
+    #sendButton {
+        min-width: 70px;
+    }
+
+}
+
+</style>
+
+
+<!-- =====================================================
+     MAIN CHAT PAGE
+     ===================================================== -->
+
+<div class="chat-page">
+
+    <div class="chat-wrapper">
+
+        <div class="chat-card">
+
+
+            <!-- =================================================
+                 HEADER
+                 ================================================= -->
+
+            <div class="chat-header">
+
+                <div class="header-top">
+
+
+                    <!-- =================================================
+                         CHAT INFORMATION
+                         ================================================= -->
+
+                    <div>
+
+                        <h3 class="chat-title">
+                            🤖 Emotion AI Assistant
+                        </h3>
+
+                        <p class="chat-subtitle">
+                            Your intelligent emotion-aware conversational assistant
+                        </p>
+
+
+                        <!-- ONLINE -->
+
+                        <div class="bot-status">
+
+                            <span class="status-dot"></span>
+
+                            <span>
+                                Online
+                            </span>
+
+                        </div>
+
+
+                        <!-- CAMERA -->
+
+                        <div class="camera-status">
+
+                            Camera:
+                            <span id="cameraStatus">
+                                Starting...
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         EMOTION STATUS
+                         ================================================= -->
+
+                    <div class="emotion-status">
+
+                        <div class="emotion-status-title">
+                            Current Emotion
+                        </div>
+
+
+                        <div class="emotion-row">
+
+                            <span id="emotionDisplay">
+                                😐 Neutral
+                            </span>
+
+                            <span id="confidenceDisplay">
+                                0%
+                            </span>
+
+                        </div>
+
+
+                        <div class="confidence-container">
+
+                            <div class="confidence-track">
+
+                                <div
+                                    id="confidenceBar">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 HIDDEN CAMERA
+                 ================================================= -->
+
+            <video
+                id="cameraVideo"
+                autoplay
+                playsinline>
+            </video>
+
+            <canvas
+                id="cameraCanvas">
+            </canvas>
+
+
+            <!-- =================================================
+                 CHAT BODY
+                 ================================================= -->
+
+            <div
+                class="chat-body"
+                id="chatBody"
+            >
+
+
+                <!-- INITIAL BOT MESSAGE -->
+
+                <div class="message bot-message">
+
+                    <div>
+
+                        <div class="message-label">
+                            AI Assistant
+                        </div>
+
+                        <div class="message-bubble">
+
+                            Hello! 👋
+                            How can I help you today?
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- =================================================
+                 INPUT AREA
+                 ================================================= -->
+
+            <div class="chat-input-area">
+
+
+                <!-- TYPING INDICATOR -->
+
+                <div
+                    class="typing"
+                    id="typingIndicator"
+                >
+
+                    AI Assistant is typing...
+
+                </div>
+
+
+                <!-- INPUT -->
+
+                <div class="chat-input-wrapper">
+
+                    <input
+                        type="text"
+                        id="messageInput"
+                        placeholder="Type your message..."
+                        autocomplete="off"
+                    >
+
+
+                    <button
+                        type="button"
+                        id="sendButton"
+                        class="btn btn-dark"
+                    >
+
+                        Send
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+// =========================================================
+// DOM ELEMENTS
+// =========================================================
+
+const chatBody =
+    document.getElementById("chatBody");
+
+const messageInput =
+    document.getElementById("messageInput");
+
+const sendButton =
+    document.getElementById("sendButton");
+
+const typingIndicator =
+    document.getElementById("typingIndicator");
+
+const emotionDisplay =
+    document.getElementById("emotionDisplay");
+
+const confidenceDisplay =
+    document.getElementById("confidenceDisplay");
+
+const confidenceBar =
+    document.getElementById("confidenceBar");
+
+const cameraVideo =
+    document.getElementById("cameraVideo");
+
+const cameraCanvas =
+    document.getElementById("cameraCanvas");
+
+const cameraStatus =
+    document.getElementById("cameraStatus");
+
+
+// =========================================================
+// LIVE EMOTION VARIABLES
+// =========================================================
+
+let currentEmotion = "Neutral";
+
+let currentConfidence = 0;
+
+let cameraStream = null;
+
+let emotionDetectionInterval = null;
+
+let isCameraRunning = false;
+
+
+// =========================================================
+// EMOTION EMOJI
+// =========================================================
+
+function getEmotionEmoji(emotion) {
+
+    const emojiMap = {
+
+        "Angry": "😠",
+
+        "Happy": "😊",
+
+        "Neutral": "😐",
+
+        "Sad": "😢",
+
+        "Surprise": "😲"
+
+    };
+
+    return emojiMap[emotion] || "😐";
+
+}
+
+
+// =========================================================
+// UPDATE EMOTION UI
+// =========================================================
+
+function updateEmotionUI(
+    emotion,
+    confidence
+) {
+
+    // -----------------------------------------------------
+    // NO EMOTION
+    // -----------------------------------------------------
+
+    if (!emotion) {
+
+        currentEmotion = "Neutral";
+
+        currentConfidence = 0;
+
+        emotionDisplay.textContent =
+            "😐 No emotion detected";
+
+        confidenceDisplay.textContent =
+            "0%";
+
+        confidenceBar.style.width =
+            "0%";
+
+        confidenceBar.style.background =
+            "#6c757d";
+
+        return;
+
+    }
+
+
+    // -----------------------------------------------------
+    // STORE CURRENT EMOTION
+    // -----------------------------------------------------
+
+    currentEmotion = emotion;
+
+    currentConfidence = confidence;
+
+
+    // -----------------------------------------------------
+    // EMOTION
+    // -----------------------------------------------------
+
+    const emoji =
+        getEmotionEmoji(emotion);
+
+    emotionDisplay.textContent =
+        `${emoji} ${emotion}`;
+
+
+    // -----------------------------------------------------
+    // CONFIDENCE
+    // -----------------------------------------------------
+
+    const percentage =
+        Math.round(
+            confidence * 1000
+        ) / 10;
+
+    confidenceDisplay.textContent =
+        `${percentage}%`;
+
+
+    // -----------------------------------------------------
+    // PROGRESS BAR
+    // -----------------------------------------------------
+
+    confidenceBar.style.width =
+        `${percentage}%`;
+
+
+    // -----------------------------------------------------
+    // CONFIDENCE COLOR
+    // -----------------------------------------------------
+
+    if (percentage >= 70) {
+
+        confidenceBar.style.background =
+            "#28a745";
+
+    }
+
+    else if (percentage >= 40) {
+
+        confidenceBar.style.background =
+            "#ffc107";
+
+    }
+
+    else {
+
+        confidenceBar.style.background =
+            "#dc3545";
+
+    }
+
+}
+
+
+// =========================================================
+// GET CSRF TOKEN
+// =========================================================
+
+function getCookie(name) {
+
+    let cookieValue = null;
+
+
+    if (
+        document.cookie &&
+        document.cookie !== ""
+    ) {
+
+        const cookies =
+            document.cookie.split(";");
+
+
+        for (
+            let cookie of cookies
+        ) {
+
+            cookie = cookie.trim();
+
+
+            if (
+                cookie.startsWith(
+                    name + "="
+                )
+            ) {
+
+                cookieValue =
+                    decodeURIComponent(
+                        cookie.substring(
+                            name.length + 1
+                        )
+                    );
+
+                break;
+
+            }
+
+        }
+
+    }
+
+
+    return cookieValue;
+
+}
+
+
+const csrftoken =
+    getCookie("csrftoken");
+
+
+// =========================================================
+// ADD MESSAGE
+// =========================================================
+
+function addMessage(
+    message,
+    sender
+) {
+
+    const messageDiv =
+        document.createElement("div");
+
+
+    messageDiv.classList.add(
+        "message"
+    );
+
+
+    if (
+        sender === "user"
+    ) {
+
+        messageDiv.classList.add(
+            "user-message"
+        );
+
+    }
+
+    else {
+
+        messageDiv.classList.add(
+            "bot-message"
+        );
+
+    }
+
+
+    const wrapper =
+        document.createElement("div");
+
+
+    const label =
+        document.createElement("div");
+
+
+    label.classList.add(
+        "message-label"
+    );
+
+
+    if (
+        sender === "user"
+    ) {
+
+        label.textContent =
+            "You";
+
+    }
+
+    else {
+
+        label.textContent =
+            "AI Assistant";
+
+    }
+
+
+    const bubble =
+        document.createElement("div");
+
+
+    bubble.classList.add(
+        "message-bubble"
+    );
+
+
+    bubble.textContent =
+        message;
+
+
+    wrapper.appendChild(label);
+
+    wrapper.appendChild(bubble);
+
+    messageDiv.appendChild(wrapper);
+
+    chatBody.appendChild(messageDiv);
+
+
+    // Scroll to latest message
+
+    chatBody.scrollTop =
+        chatBody.scrollHeight;
+
+}
+
+
+// =========================================================
+// START CAMERA
+// =========================================================
+
+async function startCamera() {
+
+    try {
+
+        cameraStatus.textContent =
+            "Requesting permission...";
+
+
+        cameraStream =
+            await navigator.mediaDevices.getUserMedia({
+
+                video: true,
+
+                audio: false
+
+            });
+
+
+        cameraVideo.srcObject =
+            cameraStream;
+
+
+        await cameraVideo.play();
+
+
+        isCameraRunning = true;
+
+
+        cameraStatus.textContent =
+            "Active";
+
+
+        // Start emotion detection
+
+        startEmotionDetection();
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Camera Error:",
+            error
+        );
+
+
+        isCameraRunning = false;
+
+
+        cameraStatus.textContent =
+            "Unavailable";
+
+
+        addMessage(
+            "Camera access is unavailable. Emotion detection cannot run.",
+            "bot"
+        );
+
+    }
+
+}
+
+
+// =========================================================
+// START EMOTION DETECTION
+// =========================================================
+
+function startEmotionDetection() {
+
+    if (
+        emotionDetectionInterval
+    ) {
+
+        clearInterval(
+            emotionDetectionInterval
+        );
+
+    }
+
+
+    emotionDetectionInterval =
+        setInterval(
+            detectCurrentEmotion,
+            800
+        );
+
+}
+
+
+// =========================================================
+// DETECT CURRENT EMOTION
+// =========================================================
+
+async function detectCurrentEmotion() {
+
+    if (
+        !isCameraRunning ||
+        cameraVideo.readyState < 2
+    ) {
+
+        return;
+
+    }
+
+
+    // -----------------------------------------------------
+    // CAMERA FRAME SIZE
+    // -----------------------------------------------------
+
+    cameraCanvas.width =
+        cameraVideo.videoWidth;
+
+    cameraCanvas.height =
+        cameraVideo.videoHeight;
+
+
+    // -----------------------------------------------------
+    // DRAW FRAME
+    // -----------------------------------------------------
+
+    const context =
+        cameraCanvas.getContext("2d");
+
+
+    context.drawImage(
+        cameraVideo,
+        0,
+        0,
+        cameraCanvas.width,
+        cameraCanvas.height
+    );
+
+
+    // -----------------------------------------------------
+    // CONVERT FRAME TO BLOB
+    // -----------------------------------------------------
+
+    cameraCanvas.toBlob(
+
+        async function(blob) {
+
+            if (!blob) {
+
+                return;
+
+            }
+
+
+            // -------------------------------------------------
+            // FORM DATA
+            // -------------------------------------------------
+
+            const formData =
+                new FormData();
+
+
+            formData.append(
+                "image",
+                blob,
+                "camera.jpg"
+            );
+
+
+            // -------------------------------------------------
+            // SEND TO EMOTION API
+            // -------------------------------------------------
+
+            try {
+
+                const response =
+                    await fetch(
+
+                        "{% url 'detect_emotion' %}",
+
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "X-CSRFToken":
+                                    csrftoken
+
+                            },
+
+                            body:
+                                formData
+
+                        }
+
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                // -------------------------------------------------
+                // SUCCESS
+                // -------------------------------------------------
+
+                if (
+                    data.success
+                ) {
+
+                    if (
+                        data.face_detected
+                    ) {
+
+                        updateEmotionUI(
+
+                            data.emotion,
+
+                            data.confidence
+
+                        );
+
+                    }
+
+                    else {
+
+                        updateEmotionUI(
+                            null,
+                            0
+                        );
+
+                    }
+
+                }
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Emotion API Error:",
+                    error
+                );
+
+            }
+
+        },
+
+        "image/jpeg",
+
+        0.75
+
+    );
+
+}
+
+
+// =========================================================
+// SEND MESSAGE
+// =========================================================
+
+async function sendMessage() {
+
+    const message =
+        messageInput.value.trim();
+
+
+    // -----------------------------------------------------
+    // EMPTY MESSAGE
+    // -----------------------------------------------------
+
+    if (!message) {
+
+        return;
+
+    }
+
+
+    // -----------------------------------------------------
+    // SHOW USER MESSAGE
+    // -----------------------------------------------------
+
+    addMessage(
+        message,
+        "user"
+    );
+
+
+    // -----------------------------------------------------
+    // CLEAR INPUT
+    // -----------------------------------------------------
+
+    messageInput.value = "";
+
+
+    // -----------------------------------------------------
+    // DISABLE SEND
+    // -----------------------------------------------------
+
+    sendButton.disabled =
+        true;
+
+
+    // -----------------------------------------------------
+    // SHOW TYPING
+    // -----------------------------------------------------
+
+    typingIndicator.style.display =
+        "block";
+
+
+    try {
+
+
+        // =================================================
+        // CREATE FORM DATA
+        // =================================================
+
+        const formData =
+            new FormData();
+
+
+        formData.append(
+            "message",
+            message
+        );
+
+
+        // =================================================
+        // SEND CURRENT EMOTION
+        // =================================================
+
+        formData.append(
+            "emotion",
+            currentEmotion
+        );
+
+
+        // =================================================
+        // SEND CURRENT CONFIDENCE
+        // =================================================
+
+        formData.append(
+            "confidence",
+            currentConfidence
+        );
+
+
+        // =================================================
+        // SEND CHAT REQUEST
+        // =================================================
+
+        const response =
+            await fetch(
+
+                "{% url 'chat_api' %}",
+
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "X-CSRFToken":
+                            csrftoken
+
+                    },
+
+                    body:
+                        formData
+
+                }
+
+            );
+
+
+        // =================================================
+        // READ JSON
+        // =================================================
+
+        const data =
+            await response.json();
+
+
+        // =================================================
+        // SUCCESS
+        // =================================================
+
+        if (
+            data.success
+        ) {
+
+
+            // ---------------------------------------------
+            // UPDATE EMOTION
+            // ---------------------------------------------
+
+            if (
+                data.emotion
+            ) {
+
+                updateEmotionUI(
+
+                    data.emotion,
+
+                    parseFloat(
+                        data.confidence
+                    ) || 0
+
+                );
+
+            }
+
+
+            // ---------------------------------------------
+            // ADD BOT RESPONSE
+            // ---------------------------------------------
+
+            addMessage(
+
+                data.response,
+
+                "bot"
+
+            );
+
+        }
+
+
+        // =================================================
+        // API ERROR
+        // =================================================
+
+        else {
+
+            addMessage(
+
+                data.error ||
+                "Something went wrong.",
+
+                "bot"
+
+            );
+
+        }
+
+
+    }
+
+
+    catch (error) {
+
+        console.error(
+            "Chat API Error:",
+            error
+        );
+
+
+        addMessage(
+
+            "Unable to connect to the chatbot.",
+
+            "bot"
+
+        );
+
+    }
+
+
+    finally {
+
+        typingIndicator.style.display =
+            "none";
+
+
+        sendButton.disabled =
+            false;
+
+
+        messageInput.focus();
+
+    }
+
+}
+
+
+// =========================================================
+// SEND BUTTON
+// =========================================================
+
+sendButton.addEventListener(
+
+    "click",
+
+    sendMessage
+
+);
+
+
+// =========================================================
+// ENTER KEY
+// =========================================================
+
+messageInput.addEventListener(
+
+    "keydown",
+
+    function(event) {
+
+        if (
+            event.key === "Enter" &&
+            !event.shiftKey
+        ) {
+
+            event.preventDefault();
+
+            sendMessage();
+
+        }
+
+    }
+
+);
+
+
+// =========================================================
+// AUTO START CAMERA
+// =========================================================
+
+document.addEventListener(
+
+    "DOMContentLoaded",
+
+    function() {
+
+        messageInput.focus();
+
+        startCamera();
+
+    }
+
+);
+
+
+</script>
+
+
+{% endblock %}
