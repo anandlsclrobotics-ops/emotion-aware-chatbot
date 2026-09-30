@@ -28,4 +28,4 @@ RUN python Web/manage.py collectstatic --noinput
 EXPOSE 10000
 
 # Run migrations and start Django
-CMD ["sh", "-c", "python Web/manage.py migrate && python -m gunicorn --chdir Web config.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:${PORT:-10000}"]
+CMD ["sh", "-c", "python -m gunicorn --chdir Web config.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:${PORT:-10000}"]
