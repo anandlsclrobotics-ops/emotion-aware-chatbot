@@ -23,6 +23,8 @@ COPY . .
 
 # Collect Django static files
 RUN python Web/manage.py collectstatic --noinput
+# data base ke leye
+RUN python Web/manage.py migrate --noinput --skip-checks
 
 # Render uses PORT environment variable
 EXPOSE 10000
