@@ -25,6 +25,8 @@ COPY . .
 RUN python Web/manage.py collectstatic --noinput
 # data base ke leye
 RUN python Web/manage.py migrate --noinput --skip-checks
+# for superuser creation
+RUN python Web/manage.py create_admin
 
 # Render uses PORT environment variable
 EXPOSE 10000
